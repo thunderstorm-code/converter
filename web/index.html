@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teva</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="/eel.js"></script>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <h1>Teva</h1>
+      </header>
+
+      <section class="tabs">
+        <button class="tab active" data-tab="toTdata">telethon → tdata</button>
+        <button class="tab" data-tab="toTelethon">tdata → telethon</button>
+      </section>
+
+      <section class="card">
+        <div class="panel active" id="toTdata">
+          <label>Session file</label>
+          <div class="picker-row">
+            <input id="sessionName" type="text" placeholder="Not selected" readonly />
+            <button id="pickSession" type="button">Choose</button>
+          </div>
+
+          <label>Save folder</label>
+          <div class="picker-row">
+            <input id="saveNameToTdata" type="text" placeholder="Not selected" readonly />
+            <button id="pickSaveToTdata" type="button">Choose</button>
+          </div>
+
+          <p class="status" id="statusToTdata">Ready</p>
+        </div>
+
+        <div class="panel" id="toTelethon">
+          <label>tdata folder</label>
+          <div class="picker-row">
+            <input id="tdataName" type="text" placeholder="Not selected" readonly />
+            <button id="pickTdata" type="button">Choose</button>
+          </div>
+
+          <label>Save folder</label>
+          <div class="picker-row">
+            <input id="saveNameToTelethon" type="text" placeholder="Not selected" readonly />
+            <button id="pickSaveToTelethon" type="button">Choose</button>
+          </div>
+
+          <p class="status" id="statusToTelethon">Ready</p>
+        </div>
+
+        <button class="convert" id="convertButton" disabled>Convert</button>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
