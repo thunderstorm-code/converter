@@ -1,38 +1,25 @@
-from __future__ import annotations
+import asyncio
+import importlib
+import random
+import sys
+import os
+from telethon.sync import TelegramClient
+from opentele.td import TDesktop
+from opentele.tl import TelegramClient
+from opentele.api import API, UseCurrentSession, CreateNewSession
 
-from pathlib import Path
+async def session_to_tdata(session_path):
+    client = TelegramClient(session_path)
+    tdesk = await client.ToTDesktop(flag=UseCurrentSession)
+    tdesk.SaveTData(f"from_session_to_tdata/tdatas/{os.path.basename(session_path)}/tdata")
 
+async def convert_session_to_tdata():
+    for session in sessions:
+        try:
+            session_path = os.path.join('./from_session_to_tdata/sessions', session)
+            await session_to_tdata(session_path)
+            print(f'конвертирую session {session} в формат TData')
+        except Exception as e:
+            print(f'Произошла ошибка - {e}')
 
-def convert_telethon_to_tdata(session_path: str, output_dir: str) -> str:
-    session_file = Path(session_path).expanduser().resolve()
-    target_dir = Path(output_dir).expanduser().resolve()
-
-    if not session_file.exists() or not session_file.is_file():
-        raise ValueError("Telethon session file was not found")
-
-    target_dir.mkdir(parents=True, exist_ok=True)
-
-    try:
-        from opentele.td import TDesktop
-        from opentele.api import API
-        from opentele.tl import TelegramClient
-    except ImportError as exc:
-        raise RuntimeError(
-            "Missing dependency: install opentele to convert telethon -> tdata"
-        ) from exc
-
-    client = TelegramClient(str(session_file), api=API.TelegramDesktop)
-
-    async def _run() -> str:
-        await client.connect()
-        if not await client.is_user_authorized():
-            raise RuntimeError("Session is not authorized")
-
-        desktop = await client.ToTDesktop(flag=TDesktop.Flag.CreateNewSession, api=API.TelegramDesktop)
-        desktop.SaveTData(str(target_dir))
-        await client.disconnect()
-        return str(target_dir)
-
-    import asyncio
-
-    return asyncio.run(_run())
+    print('Завершил конвертацию')

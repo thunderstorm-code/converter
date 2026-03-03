@@ -1,98 +1,86 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-import tkinter as tk
-from tkinter import filedialog
 
-import eel
+from PySide6.QtWidgets import QApplication
 
-from s_to_y import convert_telethon_to_tdata
-from t_to_s import convert_tdata_to_telethon
+from teva_ui import TevaWindow
 
 
-class TgConverterService:
-    def telethon_to_tdata(self, session_path: str, output_dir: str) -> str:
-        if not session_path.strip():
-            raise ValueError("Session path is required")
-        if not output_dir.strip():
-            raise ValueError("Output folder is required")
-        return convert_telethon_to_tdata(session_path, output_dir)
+class ConverterService:
+    """Simple file conversion service.
 
-    def tdata_to_telethon(self, tdata_dir: str, output_dir: str) -> str:
-        if not tdata_dir.strip():
-            raise ValueError("tdata folder is required")
-        if not output_dir.strip():
-            raise ValueError("Output folder is required")
-        output_path = str(Path(output_dir).expanduser().resolve() / "converted.session")
-        return convert_tdata_to_telethon(tdata_dir, output_path)
+    Uses Pillow when available for image conversion. If Pillow is missing,
+    conversion gracefully falls back with a clear error.
+    """
 
+    supported_inputs = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 
-service = TgConverterService()
+    def convert_one(self, input_path: str, target_ext: str, quality: int) -> Path:
+        src = Path(input_path)
+        if not src.exists() or not src.is_file():
+            raise ValueError("Файл не найден")
+        if src.suffix.lower() not in self.supported_inputs:
+            raise ValueError("Неподдерживаемый тип исходного файла")
 
+        dst = src.with_suffix(f".{target_ext.lower()}")
+        self._save_image(src, dst, quality)
+        return dst
 
-def _pick_file(title: str, filetypes: list[tuple[str, str]] | None = None) -> str:
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)
-    path = filedialog.askopenfilename(title=title, filetypes=filetypes or [("All files", "*.*")])
-    root.destroy()
-    return path or ""
+    def convert_folder(self, folder_path: str, target_ext: str, quality: int) -> int:
+        folder = Path(folder_path)
+        if not folder.exists() or not folder.is_dir():
+            raise ValueError("Папка не найдена")
 
+        files = [p for p in folder.iterdir() if p.suffix.lower() in self.supported_inputs]
+        if not files:
+            raise ValueError("В папке нет подходящих файлов")
 
-def _pick_folder(title: str) -> str:
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)
-    path = filedialog.askdirectory(title=title)
-    root.destroy()
-    return path or ""
+        for src in files:
+            dst = src.with_suffix(f".{target_ext.lower()}")
+            self._save_image(src, dst, quality)
+        return len(files)
 
+    def _save_image(self, src: Path, dst: Path, quality: int) -> None:
+        try:
+            from PIL import Image
+        except ImportError as exc:
+            raise RuntimeError("Для конвертации нужен Pillow: pip install pillow") from exc
 
-@eel.expose
-def pick_session_file() -> dict:
-    path = _pick_file("Select Telethon session", [("Session files", "*.session"), ("All files", "*.*")])
-    return {"path": path, "name": Path(path).name if path else ""}
-
-
-@eel.expose
-def pick_tdata_folder() -> dict:
-    path = _pick_folder("Select tdata folder")
-    return {"path": path, "name": Path(path).name if path else ""}
+        with Image.open(src) as img:
+            img.save(dst, quality=quality)
 
 
-@eel.expose
-def pick_output_folder() -> dict:
-    path = _pick_folder("Select output folder")
-    return {"path": path, "name": Path(path).name if path else ""}
+class TevaController:
+    def __init__(self, window: TevaWindow, service: ConverterService) -> None:
+        self.window = window
+        self.service = service
 
+        self.window.convert_requested.connect(self.handle_single_convert)
+        self.window.batch_requested.connect(self.handle_batch_convert)
 
-@eel.expose
-def convert_telethon(data: dict) -> dict:
-    try:
-        result = service.telethon_to_tdata(
-            session_path=data.get("sessionPath", ""),
-            output_dir=data.get("outputDir", ""),
-        )
-        return {"ok": True, "message": f"Done: {result}"}
-    except Exception as exc:
-        return {"ok": False, "message": f"Error: {exc}"}
+    def handle_single_convert(self, path: str, fmt: str, quality: int) -> None:
+        try:
+            result = self.service.convert_one(path, fmt, quality)
+            self.window.set_single_status(f"Готово: {result.name}")
+        except Exception as exc:
+            self.window.set_single_status(f"Ошибка: {exc}", error=True)
 
-
-@eel.expose
-def convert_tdata(data: dict) -> dict:
-    try:
-        result = service.tdata_to_telethon(
-            tdata_dir=data.get("tdataDir", ""),
-            output_dir=data.get("outputDir", ""),
-        )
-        return {"ok": True, "message": f"Done: {result}"}
-    except Exception as exc:
-        return {"ok": False, "message": f"Error: {exc}"}
+    def handle_batch_convert(self, path: str, fmt: str, quality: int) -> None:
+        try:
+            count = self.service.convert_folder(path, fmt, quality)
+            self.window.set_batch_status(f"Готово: обработано {count} файлов")
+        except Exception as exc:
+            self.window.set_batch_status(f"Ошибка: {exc}", error=True)
 
 
 def main() -> None:
-    eel.init("web")
-    eel.start("index.html", size=(980, 700), title="Teva")
+    app = QApplication(sys.argv)
+    win = TevaWindow()
+    TevaController(win, ConverterService())
+    win.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
