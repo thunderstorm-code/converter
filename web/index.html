@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teva</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="/eel.js"></script>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <h1>Teva</h1>
+        <p>Конвертер изображений</p>
+      </header>
+
+      <section class="tabs">
+        <button class="tab active" data-tab="single">Один файл</button>
+        <button class="tab" data-tab="batch">Папка</button>
+      </section>
+
+      <section class="card">
+        <div class="panel active" id="single">
+          <label>Путь к файлу</label>
+          <input id="singlePath" type="text" placeholder="/home/user/image.png" />
+
+          <label>Формат</label>
+          <select id="singleFormat">
+            <option>png</option>
+            <option>jpg</option>
+            <option>webp</option>
+            <option>bmp</option>
+          </select>
+
+          <label>Качество: <span id="singleQualityValue">90</span></label>
+          <input id="singleQuality" type="range" min="1" max="100" value="90" />
+
+          <button class="primary" id="singleRun">Конвертировать</button>
+          <p class="status" id="singleStatus">Готово к конвертации</p>
+        </div>
+
+        <div class="panel" id="batch">
+          <label>Путь к папке</label>
+          <input id="batchPath" type="text" placeholder="/home/user/images" />
+
+          <label>Формат</label>
+          <select id="batchFormat">
+            <option>png</option>
+            <option>jpg</option>
+            <option>webp</option>
+            <option>bmp</option>
+          </select>
+
+          <label>Качество: <span id="batchQualityValue">90</span></label>
+          <input id="batchQuality" type="range" min="1" max="100" value="90" />
+
+          <button class="primary" id="batchRun">Конвертировать папку</button>
+          <p class="status" id="batchStatus">Выберите папку для конвертации</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
