@@ -1,44 +1,45 @@
-const вкладки = document.querySelectorAll('.tab');
-const панели = document.querySelectorAll('.panel');
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
 
-for (const кнопка of вкладки) {
-  кнопка.addEventListener('click', () => {
-    for (const t of вкладки) t.classList.remove('active');
-    кнопка.classList.add('active');
+for (const button of tabs) {
+  button.addEventListener('click', () => {
+    for (const tab of tabs) tab.classList.remove('active');
+    button.classList.add('active');
 
-    const id = кнопка.dataset.tab;
-    for (const панель of панели) {
-      панель.classList.toggle('active', панель.id === id);
+    const id = button.dataset.tab;
+    for (const panel of panels) {
+      panel.classList.toggle('active', panel.id === id);
     }
   });
 }
 
-const singleQuality = document.getElementById('singleQuality');
-const singleQualityValue = document.getElementById('singleQualityValue');
-singleQuality.addEventListener('input', () => (singleQualityValue.textContent = singleQuality.value));
+async function runTelethonToTdata() {
+  const status = document.getElementById('statusToTdata');
+  status.classList.remove('error');
+  status.textContent = 'Working...';
 
-const batchQuality = document.getElementById('batchQuality');
-const batchQualityValue = document.getElementById('batchQualityValue');
-batchQuality.addEventListener('input', () => (batchQualityValue.textContent = batchQuality.value));
+  const response = await eel.convert_telethon({
+    sessionPath: document.getElementById('sessionPath').value,
+    outputDir: document.getElementById('outputDir').value,
+  })();
 
-document.getElementById('singleRun').addEventListener('click', async () => {
-  const путь = document.getElementById('singlePath').value;
-  const формат = document.getElementById('singleFormat').value;
-  const качество = Number(document.getElementById('singleQuality').value);
-  const статус = document.getElementById('singleStatus');
+  status.textContent = response.message;
+  status.classList.toggle('error', !response.ok);
+}
 
-  const ответ = await eel.конвертировать_один(путь, формат, качество)();
-  статус.textContent = ответ.message;
-  статус.classList.toggle('error', !ответ.ok);
-});
+async function runTdataToTelethon() {
+  const status = document.getElementById('statusToTelethon');
+  status.classList.remove('error');
+  status.textContent = 'Working...';
 
-document.getElementById('batchRun').addEventListener('click', async () => {
-  const путь = document.getElementById('batchPath').value;
-  const формат = document.getElementById('batchFormat').value;
-  const качество = Number(document.getElementById('batchQuality').value);
-  const статус = document.getElementById('batchStatus');
+  const response = await eel.convert_tdata({
+    tdataDir: document.getElementById('tdataDir').value,
+    outputSessionPath: document.getElementById('outputSessionPath').value,
+  })();
 
-  const ответ = await eel.конвертировать_пачку(путь, формат, качество)();
-  статус.textContent = ответ.message;
-  статус.classList.toggle('error', !ответ.ok);
-});
+  status.textContent = response.message;
+  status.classList.toggle('error', !response.ok);
+}
+
+document.getElementById('runToTdata').addEventListener('click', runTelethonToTdata);
+document.getElementById('runToTelethon').addEventListener('click', runTdataToTelethon);

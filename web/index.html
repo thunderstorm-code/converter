@@ -1,61 +1,45 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teva</title>
+    <title>Teva TG Converter</title>
     <link rel="stylesheet" href="style.css" />
     <script type="text/javascript" src="/eel.js"></script>
   </head>
   <body>
     <main class="app">
       <header class="top">
-        <h1>Teva</h1>
-        <p>Конвертер изображений</p>
+        <h1>Teva TG Converter</h1>
+        <p>Telegram account data converter</p>
       </header>
 
       <section class="tabs">
-        <button class="tab active" data-tab="single">Один файл</button>
-        <button class="tab" data-tab="batch">Папка</button>
+        <button class="tab active" data-tab="toTdata">telethon → tdata</button>
+        <button class="tab" data-tab="toTelethon">tdata → telethon</button>
       </section>
 
       <section class="card">
-        <div class="panel active" id="single">
-          <label>Путь к файлу</label>
-          <input id="singlePath" type="text" placeholder="/home/user/image.png" />
+        <div class="panel active" id="toTdata">
+          <label>Telethon session file (.session)</label>
+          <input id="sessionPath" type="text" placeholder="C:/tg/my.session" />
 
-          <label>Формат</label>
-          <select id="singleFormat">
-            <option>png</option>
-            <option>jpg</option>
-            <option>webp</option>
-            <option>bmp</option>
-          </select>
+          <label>Output folder for tdata</label>
+          <input id="outputDir" type="text" placeholder="C:/tg/output_tdata" />
 
-          <label>Качество: <span id="singleQualityValue">90</span></label>
-          <input id="singleQuality" type="range" min="1" max="100" value="90" />
-
-          <button class="primary" id="singleRun">Конвертировать</button>
-          <p class="status" id="singleStatus">Готово к конвертации</p>
+          <button class="primary" id="runToTdata">Convert to tdata</button>
+          <p class="status" id="statusToTdata">Ready</p>
         </div>
 
-        <div class="panel" id="batch">
-          <label>Путь к папке</label>
-          <input id="batchPath" type="text" placeholder="/home/user/images" />
+        <div class="panel" id="toTelethon">
+          <label>tdata directory</label>
+          <input id="tdataDir" type="text" placeholder="C:/tg/tdata" />
 
-          <label>Формат</label>
-          <select id="batchFormat">
-            <option>png</option>
-            <option>jpg</option>
-            <option>webp</option>
-            <option>bmp</option>
-          </select>
+          <label>Output telethon session path</label>
+          <input id="outputSessionPath" type="text" placeholder="C:/tg/new_account.session" />
 
-          <label>Качество: <span id="batchQualityValue">90</span></label>
-          <input id="batchQuality" type="range" min="1" max="100" value="90" />
-
-          <button class="primary" id="batchRun">Конвертировать папку</button>
-          <p class="status" id="batchStatus">Выберите папку для конвертации</p>
+          <button class="primary" id="runToTelethon">Convert to telethon</button>
+          <p class="status" id="statusToTelethon">Ready</p>
         </div>
       </section>
     </main>
